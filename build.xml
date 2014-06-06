@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="adb_runner" default="dist" basedir=".">
+    
+    <!-- compilation options -->
+	<property name="java.encoding" value="UTF-8" />
+	<property name="java.target" value="1.6" />
+	<property name="java.source" value="1.6" />
+	<property name="java.compilerargs" value="" />
+
+	<!-- input directories -->
+	<property name="source.dir" value="src" />
+    <property name="source.absolute.dir" location="${source.dir}" />
+	<property name="resource.dir" value="res" />
+	<property name="resource.absolute.dir" location="${resource.dir}" />
+	<property name="jar.libs.dir" value="libs" />
+	<property name="jar.libs.absolute.dir" location="${jar.libs.dir}" />
+
+	<!-- output directories -->
+	<property name="out.dir" value="out" />
+	<property name="out.absolute.dir" location="${out.dir}" />
+	<property name="out.classes.absolute.dir" location="${out.dir}/classes" />
+	<property name="out.res.absolute.dir" location="${out.dir}/resource" />
+	<property name="dist.dir" value="dist" />
+	<property name="dist.absolute.dir" location="${dist.dir}" />
+
+	<!-- extras -->
+	<property name="user.name" value="cheoloh.park, cosooki" />
+
+	<path id="project.classpath">
+		<pathelement location="${out.classes.absolute.dir}" />
+		<fileset dir="${jar.libs.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean" description="remove all generated artifacts">
+		<delete dir="${out.absolute.dir}" verbose="${verbose}" />
+		<delete dir="${dist.absolute.dir}" verbose="${verbose}" />
+
+		<delete dir="${test.out.absolute.dir}" />
+	</target>
+
+	<target name="init" description="create the output directories">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<mkdir dir="${out.classes.absolute.dir}" />
+		<mkdir dir="${out.res.absolute.dir}" />
+		<mkdir dir="${dist.absolute.dir}" />
+	</target>
+
+	<target name="compile" description="compile all java soure files"
+		depends="init">
+
+		<path id="project.javac.classpath">
+			<path refid="project.classpath" />
+		</path>
+
+		<javac encoding="${java.encoding}" source="${java.source}"
+			target="${java.target}" debug="true" extdirs="" includeantruntime="false"
+			destdir="${out.classes.absolute.dir}" classpathref="project.javac.classpath"
+			fork="${need.javac.fork}">
+			<src path="${source.absolute.dir}" />
+			<compilerarg line="${java.compilerargs}" />
+		</javac>
+	</target>
+
+	<target name="dist" description="generate the distribution"
+		depends="compile">
+		<copy todir="${dist.absolute.dir}">
+			<fileset dir="${resource.absolute.dir}">
+				<include name="**/**" />
+				<exclude name="**/*.dex" />
+			</fileset>
+		</copy>
+		<jar jarfile="${dist.absolute.dir}/${ant.project.name}-${DSTAMP}.jar"
+			basedir="${out.classes.absolute.dir}">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="com.cosooki.adb.Main" />
+			</manifest>
+			<zipgroupfileset dir="${jar.libs.absolute.dir}"
+				includes="**/*.jar" />
+			<fileset dir="${out.res.absolute.dir}" />
+		</jar>
+	</target>
+</project>
